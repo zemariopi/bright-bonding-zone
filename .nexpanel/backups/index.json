@@ -30,5 +30,13 @@
     "files": [
       "src/routes/index.tsx"
     ]
+  },
+  {
+    "id": "2026-09-22T14-27-49",
+    "timestamp": "2026-09-22T14:27:49.482Z",
+    "label": "Quero agora q vc deixe somente a imagem do cachorro. Limpa. ",
+    "files": [
+      "src/routes/index.tsx"
+    ]
   }
 ]
