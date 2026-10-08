@@ -1,2 +1,62 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+ --navy: #0F2040;
+ --navy-700: #152B57;
+ --navy-900: #0A1932;
+ --electric: #2B7FFF;
+ --electric-600: #1D64d8;
+ --ink: #0F172A;
+ --muted: #64748B;
+ --line: #E2E8F0;
+ --bg: #F8FAFC;
+ --background: 0 0% 100%;
+ --foreground: 222 47% 11%;
+ --card: 0 0% 100%;
+ --card-foreground: 222 47% 11%;
+ --primary: 221 62% 15%;
+ --primary-foreground: 0 0% 98%;
+ --secondary: 210 40% 96%;
+ --secondary-foreground: 222 47% 11%;
+ --muted-foreground: 215 16% 47%;
+ --accent: 210 40% 96%;
+ --accent-foreground: 222 47% 11%;
+ --border: 214 32% 91%;
+ --input: 214 32% 91%;
+ --ring: 217 91% 60%;
+ --radius: 0.75rem;
+}
+
+* { border-color: hsl(var(--border)); }
+html { scroll-behavior: smooth; }
+body {
+ font-family: 'Inter', system-ui, -apple-system, sans-serif;
+ background: #F8FAFC;
+ color: #0F172A;
+ -webkit-font-smoothing: antialiased;
+}
+.font-display { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+
+/* premium utilities */
+.bg-navy { background: var(--navy); }
+.bg-navy-soft { background: #0F2040F2; }
+.text-navy { color: var(--navy); }
+.text-electric { color: var(--electric); }
+.bg-electric { background: var(--electric); }
+.border-electric { border-color: var(--electric); }
+.shadow-premium { box-shadow: 0 10px 40px -12px rgba(15,32,64,0.18), 0 4px 16px -4px rgba(15,32,64,0.08); }
+.shadow-card { box-shadow: 0 1px 3px rgba(15,32,64,0.08), 0 8px 24px rgba(15,32,64,0.06); }
+
+@media print {
+ header,.no-print { display: none!important; }
+ body { background: white!important; }
+.print-break { break-inside: avoid; }
+ a[href^="http"]:after { content: " (" attr(href) ")"; font-size: 10px; color: #64748B; }
+}
+
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform: translateY(0);} }
+.animate-in { animation: fadeIn 0.45s ease-out; }
