@@ -45,6 +45,7 @@ body {
 .bg-navy-soft { background: #0F2040F2; }
 .text-navy { color: var(--navy); }
 .text-electric { color: var(--electric); }
+.text-ink { color: var(--ink); }
 .bg-electric { background: var(--electric); }
 .border-electric { border-color: var(--electric); }
 .shadow-premium { box-shadow: 0 10px 40px -12px rgba(15,32,64,0.18), 0 4px 16px -4px rgba(15,32,64,0.08); }
