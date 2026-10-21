@@ -14,16 +14,157 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_calls: {
+        Row: {
+          audit_id: string | null
+          created_at: string
+          http_status: number | null
+          id: string
+          kind: string
+          outcome: string
+          user_id: string
+        }
+        Insert: {
+          audit_id?: string | null
+          created_at?: string
+          http_status?: number | null
+          id?: string
+          kind: string
+          outcome: string
+          user_id: string
+        }
+        Update: {
+          audit_id?: string | null
+          created_at?: string
+          http_status?: number | null
+          id?: string
+          kind?: string
+          outcome?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_calls_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audits: {
+        Row: {
+          business_name: string
+          city: string
+          completed_at: string
+          id: string
+          place_id: string
+          uf: string
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          city: string
+          completed_at?: string
+          id?: string
+          place_id: string
+          uf: string
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          city?: string
+          completed_at?: string
+          id?: string
+          place_id?: string
+          uf?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          monthly_audit_limit: number | null
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          monthly_audit_limit?: number | null
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          monthly_audit_limit?: number | null
+          name?: string
+        }
+        Relationships: []
+      }
+      user_plans: {
+        Row: {
+          assigned_at: string
+          plan_id: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          plan_id?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          plan_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +291,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
