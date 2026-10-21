@@ -1,15 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { checkHours, checkReviews, checkServices, runAudit, scoreAudit } from "./gbp-checks";
+import * as c from "./gbp-checks";
 
 describe("gbp checks", () => {
-  it("missing hours is Erro", () => expect(checkHours({ regularHours: [] }).status).toBe("error"));
-  it("field not returned is Não verificado", () => expect(checkHours({}).status).toBe("unverified"));
-  it("low owner reply rate is Atenção", () => expect(checkReviews({ reviewCount: 10, rating: 4.5, ownerReplyRate: 0.2 }).status).toBe("warning"));
-  it("public mode cannot verify services", () => expect(checkServices({}).status).toBe("unverified"));
-  it("score ignores unverified checks", () => {
-    const s = scoreAudit(runAudit({ regularHours: ["seg"] }));
-    expect(s.verified).toBe(2); // hours OK + completeness 1/1
-    expect(s.score).toBe(100);
+  it("every check is Não verificado when no data is returned", () => {
+    for (const x of c.runAudit({})) {
+      expect(x.status).toBe("unverified");
+      expect(x.fact).toBeNull();
+      expect(x.unavailable).not.toBeNull();
+    }
   });
-  it("empty profile has no score", () => expect(scoreAudit(runAudit({})).score).toBeNull());
+  it("runs exactly 10 checks", () => expect(c.runAudit({})).toHaveLength(10));
+  it("missing hours is not a confirmed violation", () => expect(c.checkHours({ regularHours: [] }).status).not.toBe("error"));
+  it("low review count is not a confirmed violation", () => expect(c.checkReviews({ reviewCount: 0, ownerReplyRate: 0 }).status).not.toBe("error"));
+  it("missing owner replies is not a confirmed violation", () => expect(c.checkReviews({ reviewCount: 10, rating: 4, ownerReplyRate: 0 }).status).not.toBe("error"));
+  it("reply rate unknown in public mode is Não verificado", () => expect(c.checkReviews({ reviewCount: 10, rating: 4 }).status).toBe("unverified"));
+  it("services are Não verificado in public mode", () => expect(c.checkServices({}).status).toBe("unverified"));
+  it("no score function is exported", () => expect("scoreAudit" in c).toBe(false));
 });
