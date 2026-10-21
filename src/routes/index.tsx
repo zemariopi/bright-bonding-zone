@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search } from "lucide-react";
+import { Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search, Flag } from "lucide-react";
 import { runAudit, type CheckStatus, type ProfileData } from "@/lib/gbp-checks";
 import { searchPlaces, getPlaceProfile } from "@/lib/places.functions";
 import { PLACES_SOURCE, type PlaceCandidate } from "@/lib/places-map";
