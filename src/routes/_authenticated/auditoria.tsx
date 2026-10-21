@@ -6,7 +6,7 @@ import { runAudit, type CheckStatus, type ProfileData } from "@/lib/gbp-checks";
 import { searchPlaces, getPlaceProfile } from "@/lib/places.functions";
 import { PLACES_SOURCE, type PlaceCandidate } from "@/lib/places-map";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/auditoria")({
   head: () => ({
     meta: [
       { title: "ZM9 Google Check — Auditoria do Perfil da Empresa no Google" },
