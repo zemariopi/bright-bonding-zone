@@ -44,10 +44,24 @@ function statusConfig(status: CheckStatus) {
 
 const WAITING = "Aguardando conexão com dados reais do Google";
 
+// 27 unidades federativas do Brasil (26 estados + Distrito Federal).
+const BRAZIL_UFS = [
+  { sigla: "AC", nome: "Acre" }, { sigla: "AL", nome: "Alagoas" }, { sigla: "AP", nome: "Amapá" },
+  { sigla: "AM", nome: "Amazonas" }, { sigla: "BA", nome: "Bahia" }, { sigla: "CE", nome: "Ceará" },
+  { sigla: "DF", nome: "Distrito Federal" }, { sigla: "ES", nome: "Espírito Santo" }, { sigla: "GO", nome: "Goiás" },
+  { sigla: "MA", nome: "Maranhão" }, { sigla: "MT", nome: "Mato Grosso" }, { sigla: "MS", nome: "Mato Grosso do Sul" },
+  { sigla: "MG", nome: "Minas Gerais" }, { sigla: "PA", nome: "Pará" }, { sigla: "PB", nome: "Paraíba" },
+  { sigla: "PR", nome: "Paraná" }, { sigla: "PE", nome: "Pernambuco" }, { sigla: "PI", nome: "Piauí" },
+  { sigla: "RJ", nome: "Rio de Janeiro" }, { sigla: "RN", nome: "Rio Grande do Norte" }, { sigla: "RS", nome: "Rio Grande do Sul" },
+  { sigla: "RO", nome: "Rondônia" }, { sigla: "RR", nome: "Roraima" }, { sigla: "SC", nome: "Santa Catarina" },
+  { sigla: "SP", nome: "São Paulo" }, { sigla: "SE", nome: "Sergipe" }, { sigla: "TO", nome: "Tocantins" },
+] as const;
+
 function Index() {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
-  const [submitted, setSubmitted] = useState<{ name: string; city: string } | null>(null);
+  const [uf, setUf] = useState("");
+  const [submitted, setSubmitted] = useState<{ name: string; city: string; uf: string } | null>(null);
   const [candidates, setCandidates] = useState<PlaceCandidate[] | null>(null);
   const [profile, setProfile] = useState<ProfileData>({});
   const [source, setSource] = useState<{ name: string | null; mapsUri: string | null; fetchedAt: string } | null>(null);
@@ -61,11 +75,11 @@ function Index() {
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !city.trim()) return;
-    setSubmitted({ name: name.trim(), city: city.trim() });
+    if (!name.trim() || !city.trim() || !uf) return;
+    setSubmitted({ name: name.trim(), city: city.trim(), uf });
     setCandidates(null); setProfile({}); setSource(null); setErrorMsg(null); setLoading(true);
     try {
-      const r = await search({ data: { name: name.trim(), city: city.trim() } });
+      const r = await search({ data: { name: name.trim(), city: city.trim(), uf } });
       if (r.status === "ok") setCandidates(r.candidates);
       else if (r.status === "error") setErrorMsg(r.message);
     } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
@@ -111,7 +125,7 @@ function Index() {
               Diagnóstico do seu <span className="text-electric">Perfil da Empresa no Google</span>
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-white/80 sm:text-[15px]">
-              Informe o nome da empresa e a cidade. A auditoria cobre 10 pontos do perfil, com dados reais e verificáveis. Informações não disponíveis aparecem como "Não verificado".
+              Informe o nome da empresa, a cidade e o estado. A auditoria cobre 10 pontos do perfil, com dados reais e verificáveis. Informações não disponíveis aparecem como "Não verificado".
             </p>
           </div>
 
@@ -126,7 +140,15 @@ function Index() {
               <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Cidade" aria-label="Cidade"
                 className="w-full bg-transparent text-sm font-medium text-ink placeholder:text-muted-foreground focus:outline-none" />
             </label>
-            <button type="submit" disabled={!name.trim() || !city.trim()}
+            <label className="flex items-center gap-3 rounded-lg border bg-[#F8FAFC] px-3 py-2.5 md:w-40">
+              <Flag className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <select value={uf} onChange={(e) => setUf(e.target.value)} aria-label="Estado (UF)"
+                className="w-full bg-transparent text-sm font-medium text-ink focus:outline-none">
+                <option value="">Estado (UF)</option>
+                {BRAZIL_UFS.map((u) => <option key={u.sigla} value={u.sigla}>{u.sigla} — {u.nome}</option>)}
+              </select>
+            </label>
+            <button type="submit" disabled={!name.trim() || !city.trim() || !uf}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-electric px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-electric-600 disabled:opacity-50">
               Auditar perfil <ArrowRight className="h-4 w-4" />
             </button>
@@ -140,7 +162,7 @@ function Index() {
               <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
-                  <div className="font-bold">{source.name ?? submitted.name} — {submitted.city}</div>
+                  <div className="font-bold">{source.name ?? submitted.name} — {submitted.city} — {submitted.uf}</div>
                   <div className="mt-1">Fonte: {PLACES_SOURCE} • consultado em {new Date(source.fetchedAt).toLocaleString("pt-BR")}{source.mapsUri && <> • <a href={source.mapsUri} target="_blank" rel="noreferrer" className="underline">ver no Google Maps</a></>}</div>
                 </div>
               </div>
@@ -149,7 +171,7 @@ function Index() {
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
                   <div className="font-bold">{errorMsg ?? (loading ? "Consultando…" : WAITING)}</div>
-                  <div className="mt-1">Busca solicitada: <strong>{submitted.name}</strong> — {submitted.city}. Nenhum dado do Google foi obtido, por isso todos os itens aparecem como "Não verificado". Nenhum resultado é simulado.</div>
+                  <div className="mt-1">Busca solicitada: <strong>{submitted.name}</strong> — {submitted.city} — {submitted.uf}. Nenhum dado do Google foi obtido, por isso todos os itens aparecem como "Não verificado". Nenhum resultado é simulado.</div>
                 </div>
               </div>
             )}
