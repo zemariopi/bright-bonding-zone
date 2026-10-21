@@ -39,7 +39,7 @@ function statusConfig(status: CheckStatus) {
   return { label: "Não verificado", color: "text-slate-600 bg-slate-50 border-slate-200", icon: <HelpCircle className="h-4 w-4" /> };
 }
 
-const WAITING = "Aguardando conexão com dados reais";
+const WAITING = "Aguardando conexão com dados reais do Google";
 
 function Index() {
   const [name, setName] = useState("");
