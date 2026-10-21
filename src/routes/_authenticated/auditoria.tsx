@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search, Flag } from "lucide-react";
@@ -69,6 +71,14 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const search = useServerFn(searchPlaces);
   const details = useServerFn(getPlaceProfile);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const signOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  };
 
   // Without real data every check receives empty data -> "Não verificado".
   const results = runAudit(profile);
@@ -82,16 +92,19 @@ function Index() {
       const r = await search({ data: { name: name.trim(), city: city.trim(), uf } });
       if (r.status === "ok") setCandidates(r.candidates);
       else if (r.status === "error") setErrorMsg(r.message);
+      else if (r.status === "limit_reached") setErrorMsg("Limite mensal de auditorias do seu plano atingido.");
     } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
     finally { setLoading(false); }
   };
 
   const pick = async (id: string) => {
+    if (!submitted) return;
     setLoading(true); setErrorMsg(null);
     try {
-      const r = await details({ data: { placeId: id } });
+      const r = await details({ data: { placeId: id, name: submitted.name, city: submitted.city, uf: submitted.uf as "GO" } });
       if (r.status === "ok") { setProfile(r.profile); setSource({ name: r.name, mapsUri: r.mapsUri, fetchedAt: r.fetchedAt }); setCandidates(null); }
       else if (r.status === "error") setErrorMsg(r.message);
+      else if (r.status === "limit_reached") setErrorMsg("Limite mensal de auditorias do seu plano atingido.");
     } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
     finally { setLoading(false); }
   };
@@ -107,9 +120,12 @@ function Index() {
               <div className="text-xs font-medium tracking-widest text-electric">PERFIL DA EMPRESA NO GOOGLE</div>
             </div>
           </div>
-          <div className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex">
-            <span className="h-2 w-2 rounded-full bg-amber-500" />
-            {WAITING}
+          <div className="flex items-center gap-4">
+            <div className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              {WAITING}
+            </div>
+            <button onClick={signOut} className="no-print rounded-lg border px-3 py-1.5 text-xs font-semibold text-navy">Sair</button>
           </div>
         </div>
       </header>
