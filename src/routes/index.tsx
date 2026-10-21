@@ -136,13 +136,39 @@ function Index() {
 
         {submitted && (
           <div className="mt-8 animate-in">
-            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
-              <div>
-                <div className="font-bold">{WAITING}</div>
-                <div className="mt-1">Busca solicitada: <strong>{submitted.name}</strong> — {submitted.city}. Nenhum dado do Google foi consultado, por isso todos os itens aparecem como "Não verificado". Nenhum resultado é simulado.</div>
+            {source ? (
+              <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <div>
+                  <div className="font-bold">{source.name ?? submitted.name} — {submitted.city}</div>
+                  <div className="mt-1">Fonte: {PLACES_SOURCE} • consultado em {new Date(source.fetchedAt).toLocaleString("pt-BR")}{source.mapsUri && <> • <a href={source.mapsUri} target="_blank" rel="noreferrer" className="underline">ver no Google Maps</a></>}</div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div>
+                  <div className="font-bold">{errorMsg ?? (loading ? "Consultando…" : WAITING)}</div>
+                  <div className="mt-1">Busca solicitada: <strong>{submitted.name}</strong> — {submitted.city}. Nenhum dado do Google foi obtido, por isso todos os itens aparecem como "Não verificado". Nenhum resultado é simulado.</div>
+                </div>
+              </div>
+            )}
+
+            {candidates && (
+              <div className="no-print mt-4 rounded-xl border bg-white p-4 shadow-card">
+                <h3 className="font-display text-sm font-bold text-navy">{candidates.length ? "Selecione o perfil correto" : "Nenhuma empresa encontrada no Google para esta busca."}</h3>
+                <ul className="mt-3 space-y-2">
+                  {candidates.map((c) => (
+                    <li key={c.id}>
+                      <button onClick={() => pick(c.id)} disabled={loading} className="flex w-full items-start gap-3 rounded-lg border bg-[#F8FAFC] px-3 py-2.5 text-left text-sm transition hover:border-electric disabled:opacity-50">
+                        <Search className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span><strong className="text-ink">{c.name}</strong><span className="block text-xs text-muted-foreground">{c.address ?? "Endereço não informado"}</span></span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <h2 className="font-display text-xl font-bold text-navy">10 Pontos de Auditoria</h2>
@@ -174,7 +200,7 @@ function Index() {
                       </div>
                       <div className="rounded-lg border bg-[#F8FAFC] px-3 py-2">
                         <dt className="font-bold text-ink">Informação indisponível</dt>
-                        <dd className="mt-0.5 text-muted-foreground">{d.unavailable ? `${WAITING}.` : "—"}</dd>
+                        <dd className="mt-0.5 text-muted-foreground">{d.unavailable ? (source ? d.unavailable : `${WAITING}.`) : "—"}</dd>
                       </div>
                       <div className="rounded-lg border bg-[#F8FAFC] px-3 py-2">
                         <dt className="font-bold text-ink">Recomendação geral</dt>
