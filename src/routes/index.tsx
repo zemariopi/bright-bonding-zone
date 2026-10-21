@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search } from "lucide-react";
-import { runAudit, type CheckStatus } from "@/lib/gbp-checks";
+import { runAudit, type CheckStatus, type ProfileData } from "@/lib/gbp-checks";
+import { searchPlaces, getPlaceProfile } from "@/lib/places.functions";
+import { PLACES_SOURCE, type PlaceCandidate } from "@/lib/places-map";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -45,14 +48,38 @@ function Index() {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [submitted, setSubmitted] = useState<{ name: string; city: string } | null>(null);
+  const [candidates, setCandidates] = useState<PlaceCandidate[] | null>(null);
+  const [profile, setProfile] = useState<ProfileData>({});
+  const [source, setSource] = useState<{ name: string | null; mapsUri: string | null; fetchedAt: string } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const search = useServerFn(searchPlaces);
+  const details = useServerFn(getPlaceProfile);
 
-  // No data source connected yet: every check receives empty data -> "Não verificado".
-  const results = runAudit({});
+  // Without real data every check receives empty data -> "Não verificado".
+  const results = runAudit(profile);
 
-  const handleAnalyze = (e: React.FormEvent) => {
+  const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !city.trim()) return;
     setSubmitted({ name: name.trim(), city: city.trim() });
+    setCandidates(null); setProfile({}); setSource(null); setErrorMsg(null); setLoading(true);
+    try {
+      const r = await search({ data: { name: name.trim(), city: city.trim() } });
+      if (r.status === "ok") setCandidates(r.candidates);
+      else if (r.status === "error") setErrorMsg(r.message);
+    } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
+    finally { setLoading(false); }
+  };
+
+  const pick = async (id: string) => {
+    setLoading(true); setErrorMsg(null);
+    try {
+      const r = await details({ data: { placeId: id } });
+      if (r.status === "ok") { setProfile(r.profile); setSource({ name: r.name, mapsUri: r.mapsUri, fetchedAt: r.fetchedAt }); setCandidates(null); }
+      else if (r.status === "error") setErrorMsg(r.message);
+    } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
+    finally { setLoading(false); }
   };
 
   return (
