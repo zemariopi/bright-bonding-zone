@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search, Flag } from "lucide-react";
+import { CircleAlert, CircleCheck, Lightbulb, Compass, BadgeCheck, Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search, Flag } from "lucide-react";
 import { runAudit, type CheckStatus, type ProfileData } from "@/lib/gbp-checks";
 import { searchPlaces, getPlaceProfile } from "@/lib/places.functions";
 import { PLACES_SOURCE, type PlaceCandidate } from "@/lib/places-map";
@@ -22,19 +22,19 @@ export const Route = createFileRoute("/_authenticated/auditoria")({
   component: Index,
 });
 
-type Meta = { icon: React.ReactNode; description: string; priority: "Alta" | "Média"; recommendation: string };
+type Meta = { icon: React.ReactNode; description: string; priority: "Alta" | "Média"; recommendation: string; where: string };
 
 const META: Record<number, Meta> = {
-  1: { icon: <Tags className="h-5 w-5" />, description: "Categoria principal e categorias adicionais.", priority: "Alta", recommendation: "Escolher a categoria principal que descreve o negócio de forma mais específica." },
-  2: { icon: <Briefcase className="h-5 w-5" />, description: "Serviços cadastrados no perfil.", priority: "Média", recommendation: "Listar os serviços realmente oferecidos." },
-  3: { icon: <MapPin className="h-5 w-5" />, description: "Endereço, localização no mapa e área de atendimento.", priority: "Alta", recommendation: "Manter endereço ou área de atendimento corretos e consistentes." },
-  4: { icon: <Clock className="h-5 w-5" />, description: "Horários regulares e especiais.", priority: "Alta", recommendation: "Manter horários atualizados, incluindo feriados." },
-  5: { icon: <Phone className="h-5 w-5" />, description: "Telefone, site e informações de contato.", priority: "Alta", recommendation: "Informar telefone e site válidos." },
-  6: { icon: <ListChecks className="h-5 w-5" />, description: "Atributos do estabelecimento.", priority: "Média", recommendation: "Marcar os atributos aplicáveis ao negócio." },
-  7: { icon: <Image className="h-5 w-5" />, description: "Quantidade e qualidade das fotos.", priority: "Média", recommendation: "Publicar fotos reais e recentes do local, equipe e produtos." },
-  8: { icon: <Star className="h-5 w-5" />, description: "Avaliações e respostas do proprietário.", priority: "Alta", recommendation: "Responder às avaliações de forma cordial e sem pedir avaliações em troca de benefícios." },
-  9: { icon: <ClipboardCheck className="h-5 w-5" />, description: "Completude e consistência das informações.", priority: "Média", recommendation: "Preencher todos os campos aplicáveis com informações consistentes." },
-  10: { icon: <Navigation className="h-5 w-5" />, description: "Presença em buscas locais, quando verificável.", priority: "Média", recommendation: "Usar como referência pontual; resultados variam por local e horário." },
+  1: { icon: <Tags className="h-5 w-5" />, description: "Categoria principal e categorias adicionais.", priority: "Alta", recommendation: "Escolher a categoria principal que descreve o negócio de forma mais específica.", where: "Editar perfil → Sobre → Categoria da empresa" },
+  2: { icon: <Briefcase className="h-5 w-5" />, description: "Serviços cadastrados no perfil.", priority: "Média", recommendation: "Listar os serviços realmente oferecidos.", where: "Editar perfil → Serviços" },
+  3: { icon: <MapPin className="h-5 w-5" />, description: "Endereço, localização no mapa e área de atendimento.", priority: "Alta", recommendation: "Manter endereço ou área de atendimento corretos e consistentes.", where: "Editar perfil → Local → Endereço / Área de serviço" },
+  4: { icon: <Clock className="h-5 w-5" />, description: "Horários regulares e especiais.", priority: "Alta", recommendation: "Manter horários atualizados, incluindo feriados.", where: "Editar perfil → Horário (e Horário especial)" },
+  5: { icon: <Phone className="h-5 w-5" />, description: "Telefone, site e informações de contato.", priority: "Alta", recommendation: "Informar telefone e site válidos.", where: "Editar perfil → Contato → Telefone e Site" },
+  6: { icon: <ListChecks className="h-5 w-5" />, description: "Atributos do estabelecimento.", priority: "Média", recommendation: "Marcar os atributos aplicáveis ao negócio.", where: "Editar perfil → Mais → Atributos" },
+  7: { icon: <Image className="h-5 w-5" />, description: "Quantidade e qualidade das fotos.", priority: "Média", recommendation: "Publicar fotos reais e recentes do local, equipe e produtos.", where: "Perfil → Adicionar fotos" },
+  8: { icon: <Star className="h-5 w-5" />, description: "Avaliações e respostas do proprietário.", priority: "Alta", recommendation: "Responder às avaliações de forma cordial e sem pedir avaliações em troca de benefícios.", where: "Perfil → Avaliações → Responder" },
+  9: { icon: <ClipboardCheck className="h-5 w-5" />, description: "Completude e consistência das informações.", priority: "Média", recommendation: "Preencher todos os campos aplicáveis com informações consistentes.", where: "Editar perfil → Sobre → Nome e Descrição" },
+  10: { icon: <Navigation className="h-5 w-5" />, description: "Presença em buscas locais, quando verificável.", priority: "Média", recommendation: "Usar como referência pontual; resultados variam por local e horário.", where: "Revisar todas as seções de Editar perfil" },
 };
 
 function statusConfig(status: CheckStatus) {
@@ -231,20 +231,25 @@ function Index() {
                       <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-navy">Prioridade {m.priority}</span>
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{m.description}</p>
-                    <dl className="mt-3 space-y-2 text-xs">
-                      <div className="rounded-lg border bg-[#F8FAFC] px-3 py-2">
-                        <dt className="font-bold text-ink">Fato confirmado</dt>
-                        <dd className="mt-0.5 text-muted-foreground">{d.fact ?? "Nenhum"}</dd>
-                      </div>
-                      <div className="rounded-lg border bg-[#F8FAFC] px-3 py-2">
-                        <dt className="font-bold text-ink">Informação indisponível</dt>
-                        <dd className="mt-0.5 text-muted-foreground">{d.unavailable ? (source ? d.unavailable : `${WAITING}.`) : "—"}</dd>
-                      </div>
-                      <div className="rounded-lg border bg-[#F8FAFC] px-3 py-2">
-                        <dt className="font-bold text-ink">Recomendação geral</dt>
-                        <dd className="mt-0.5 text-muted-foreground">{d.recommendation ?? m.recommendation}</dd>
-                      </div>
-                    </dl>
+                    <div className="mt-4 space-y-2.5 text-xs">
+                      {d.status === "unverified" ? (
+                        <div className="rpt rpt-muted"><p className="rpt-h"><HelpCircle className="h-4 w-4" /> Não verificado</p>
+                          {d.fact && <p className="mt-1">{d.fact}</p>}
+                          <p className="mt-1">{d.unavailable ? (source ? d.unavailable : `${WAITING}.`) : `${WAITING}.`}</p></div>
+                      ) : d.status === "success" ? (
+                        <div className="rpt rpt-ok"><p className="rpt-h"><BadgeCheck className="h-4 w-4" /> Critério atendido</p>
+                          {d.fact && <p className="mt-1">{d.fact}</p>}
+                          {d.unavailable && <p className="mt-1 opacity-80">{d.unavailable}</p>}</div>
+                      ) : (
+                        <>
+                          <div className="rpt rpt-bad"><p className="rpt-h"><CircleAlert className="h-4 w-4" /> Problema identificado</p><p className="mt-1">{d.fact}</p></div>
+                          <div className="rpt rpt-ok"><p className="rpt-h"><CircleCheck className="h-4 w-4" /> O que seria correto</p><p className="mt-1">{d.recommendation ?? m.recommendation}</p></div>
+                          {d.impact && <div className="rpt rpt-why"><p className="rpt-h"><Lightbulb className="h-4 w-4" /> Por que corrigir</p><p className="mt-1">{d.impact}</p></div>}
+                          <div className="rpt rpt-where"><p className="rpt-h"><Compass className="h-4 w-4" /> Onde corrigir</p><p className="mt-1">{m.where}</p></div>
+                          {d.unavailable && <p className="px-1 text-muted-foreground">{d.unavailable}</p>}
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}
