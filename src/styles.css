@@ -51,6 +51,15 @@ body {
 .shadow-premium { box-shadow: 0 10px 40px -12px rgba(15,32,64,0.18), 0 4px 16px -4px rgba(15,32,64,0.08); }
 .shadow-card { box-shadow: 0 1px 3px rgba(15,32,64,0.08), 0 8px 24px rgba(15,32,64,0.06); }
 
+/* report sections */
+.rpt { border-radius: 0.6rem; border: 1px solid; border-left-width: 4px; padding: 0.6rem 0.75rem; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rpt-h { display: flex; align-items: center; gap: 0.4rem; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.rpt-bad { background: #FEF2F2; border-color: #FECACA; border-left-color: #DC2626; color: #7F1D1D; }
+.rpt-ok { background: #F0FDF4; border-color: #BBF7D0; border-left-color: #16A34A; color: #14532D; }
+.rpt-why { background: #EFF6FF; border-color: #BFDBFE; border-left-color: #2B7FFF; color: #1E3A8A; }
+.rpt-where { background: #FFFBEB; border-color: #FDE68A; border-left-color: #C9A227; color: #713F12; }
+.rpt-muted { background: #F8FAFC; border-color: #E2E8F0; border-left-color: #94A3B8; color: #475569; }
+
 @media print {
  header,.no-print { display: none!important; }
  body { background: white!important; }
