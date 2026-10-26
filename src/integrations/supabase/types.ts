@@ -22,6 +22,7 @@ export type Database = {
           id: string
           kind: string
           outcome: string
+          query_key: string | null
           user_id: string
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           kind: string
           outcome: string
+          query_key?: string | null
           user_id: string
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           kind?: string
           outcome?: string
+          query_key?: string | null
           user_id?: string
         }
         Relationships: [
@@ -155,12 +158,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finish_places_call: {
+        Args: {
+          _audit_id?: string
+          _http_status: number
+          _id: string
+          _ok: boolean
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reserve_places_call: {
+        Args: { _kind: string; _query_key?: string; _user_id: string }
+        Returns: {
+          denied: string
+          reservation_id: string
+        }[]
       }
     }
     Enums: {
