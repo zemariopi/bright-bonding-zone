@@ -34,7 +34,7 @@ async function admin() {
  */
 async function reserve(userId: string, kind: ApiCallKind, queryKey: string | null): Promise<{ id: string } | Limited | Failed> {
   const db = await admin();
-  const { data, error } = await db.rpc("reserve_places_call", { _user_id: userId, _kind: kind, _query_key: queryKey ?? undefined });
+  const { data, error } = await db.rpc("reserve_places_call", { _user_id: userId, _kind: kind, _query_key: queryKey } as never);
   const row = Array.isArray(data) ? data[0] : null;
   if (error || !row) {
     console.error("reserve_places_call failed", error?.message);
@@ -47,7 +47,7 @@ async function reserve(userId: string, kind: ApiCallKind, queryKey: string | nul
 /** Records the result of a reserved call. Never consumes plan units. */
 async function finish(id: string, ok: boolean, httpStatus: number | null, auditId: string | null = null) {
   const db = await admin();
-  const { error } = await db.rpc("finish_places_call", { _id: id, _ok: ok, _http_status: httpStatus ?? undefined, _audit_id: auditId ?? undefined });
+  const { error } = await db.rpc("finish_places_call", { _id: id, _ok: ok, _http_status: httpStatus, _audit_id: auditId } as never);
   if (error) console.error("finish_places_call failed", error.message);
 }
 
