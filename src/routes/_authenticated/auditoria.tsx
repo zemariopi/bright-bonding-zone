@@ -169,7 +169,7 @@ function Index() {
               Auditar perfil <ArrowRight className="h-4 w-4" />
             </button>
           </form>
-          <p className="mt-3 text-center text-xs text-white/60 sm:text-left">Exemplo: Padaria Central — Campinas — SP. Análise não invasiva, sem necessidade de login.</p>
+          <p className="mt-3 text-center text-xs text-white/60 sm:text-left">Exemplo: Padaria Central — Campinas — SP. Diagnóstico baseado em informações públicas disponíveis no Google.</p>
         </div>
 
         {submitted && (
