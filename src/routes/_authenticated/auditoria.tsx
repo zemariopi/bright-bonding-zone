@@ -6,6 +6,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { CircleAlert, CircleCheck, Lightbulb, Compass, BadgeCheck, Tags, Briefcase, MapPin, Clock, Phone, ListChecks, Image, Star, ClipboardCheck, Navigation, CheckCircle2, AlertTriangle, XCircle, HelpCircle, ArrowRight, Zap, Building2, Search, Flag } from "lucide-react";
 import { runAudit, type CheckStatus, type ProfileData } from "@/lib/gbp-checks";
 import { searchPlaces, getPlaceProfile } from "@/lib/places.functions";
+import { ACCESS_DENIED_MESSAGE } from "@/lib/safeguards";
+
+function callErrorMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes("Unauthorized") ? ACCESS_DENIED_MESSAGE : "Não foi possível conectar ao Google. Nenhum resultado foi gerado.";
+}
 import { PLACES_SOURCE, type PlaceCandidate } from "@/lib/places-map";
 
 export const Route = createFileRoute("/_authenticated/auditoria")({
@@ -91,21 +97,19 @@ function Index() {
     try {
       const r = await search({ data: { name: name.trim(), city: city.trim(), uf } });
       if (r.status === "ok") setCandidates(r.candidates);
-      else if (r.status === "error") setErrorMsg(r.message);
-      else if (r.status === "limit_reached") setErrorMsg("Limite mensal de auditorias do seu plano atingido.");
-    } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
+      else if (r.status === "error" || r.status === "limit_reached") setErrorMsg(r.message);
+    } catch (err) { setErrorMsg(callErrorMessage(err)); }
     finally { setLoading(false); }
   };
 
   const pick = async (id: string) => {
-    if (!submitted) return;
+    if (!submitted || loading) return;
     setLoading(true); setErrorMsg(null);
     try {
       const r = await details({ data: { placeId: id, name: submitted.name, city: submitted.city, uf: submitted.uf as "GO" } });
       if (r.status === "ok") { setProfile(r.profile); setSource({ name: r.name, mapsUri: r.mapsUri, fetchedAt: r.fetchedAt }); setCandidates(null); }
-      else if (r.status === "error") setErrorMsg(r.message);
-      else if (r.status === "limit_reached") setErrorMsg("Limite mensal de auditorias do seu plano atingido.");
-    } catch { setErrorMsg("Não foi possível conectar ao Google. Nenhum resultado foi gerado."); }
+      else if (r.status === "error" || r.status === "limit_reached") setErrorMsg(r.message);
+    } catch (err) { setErrorMsg(callErrorMessage(err)); }
     finally { setLoading(false); }
   };
 
